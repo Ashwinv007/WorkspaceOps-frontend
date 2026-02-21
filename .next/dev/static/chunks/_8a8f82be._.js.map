@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///home/ashwin/Projects/workspaceops-frontend/src/app/%28app%29/layout.tsx"],"sourcesContent":["\"use client\"\n\nimport { useEffect } from \"react\"\nimport { useRouter } from \"next/navigation\"\n\nexport default function AppLayout({ children }: { children: React.ReactNode }) {\n  const router = useRouter()\n\n  useEffect(() => {\n    const token = localStorage.getItem(\"workspaceops_token\")\n    if (!token) {\n      router.push(\"/login\")\n    }\n  }, [router])\n\n  return <>{children}</>\n}\n"],"names":[],"mappings":";;;;;AAEA;AACA;;;AAHA;;;AAKe,SAAS,UAAU,EAAE,QAAQ,EAAiC;;IAC3E,MAAM,SAAS,IAAA,kJAAS;IAExB,IAAA,0KAAS;+BAAC;YACR,MAAM,QAAQ,aAAa,OAAO,CAAC;YACnC,IAAI,CAAC,OAAO;gBACV,OAAO,IAAI,CAAC;YACd;QACF;8BAAG;QAAC;KAAO;IAEX,qBAAO;kBAAG;;AACZ;GAXwB;;QACP,kJAAS;;;KADF"}},
+    {"offset": {"line": 47, "column": 0}, "map": {"version":3,"sources":["file:///home/ashwin/Projects/workspaceops-frontend/node_modules/next/navigation.js"],"sourcesContent":["module.exports = require('./dist/client/components/navigation')\n"],"names":[],"mappings":"AAAA,OAAO,OAAO","ignoreList":[0]}}]
+}
