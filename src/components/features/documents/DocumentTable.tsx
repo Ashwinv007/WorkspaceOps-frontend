@@ -52,11 +52,11 @@ export function DocumentTable({
       </TableHeader>
       <TableBody>
         {documents.map((doc) => (
-          <TableRow key={doc.id}>
+          <TableRow key={doc.id} className="hover:bg-muted/40 transition-colors duration-100">
             <TableCell>
               <button
                 onClick={() => downloadDocument(doc.downloadUrl, doc.fileName)}
-                className="font-medium hover:underline text-left"
+                className="font-medium hover:underline text-left cursor-pointer"
               >
                 {doc.fileName}
               </button>
@@ -86,11 +86,11 @@ export function DocumentTable({
               {format(new Date(doc.createdAt), "MMM d, yyyy")}
             </TableCell>
             <TableCell>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center justify-end gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-9 w-9"
                   onClick={() => downloadDocument(doc.downloadUrl, doc.fileName)}
                 >
                   <Download className="h-4 w-4" />
@@ -99,7 +99,7 @@ export function DocumentTable({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-9 w-9"
                     onClick={() => onEdit(doc)}
                   >
                     <Pencil className="h-4 w-4" />
@@ -109,7 +109,7 @@ export function DocumentTable({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    className="h-9 w-9 text-destructive hover:text-destructive"
                     onClick={() => onDelete(doc)}
                   >
                     <Trash2 className="h-4 w-4" />

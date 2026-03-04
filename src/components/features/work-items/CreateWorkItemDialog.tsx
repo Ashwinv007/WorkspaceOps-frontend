@@ -184,7 +184,7 @@ export function CreateWorkItemDialog({
         </form>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => { reset(); setDueDate(undefined); onOpenChange(false) }}>
+          <Button variant="ghost" onClick={() => { reset(); setDueDate(undefined); onOpenChange(false) }}>
             Cancel
           </Button>
           <Button type="submit" form="create-wi-form" disabled={mutation.isPending}>

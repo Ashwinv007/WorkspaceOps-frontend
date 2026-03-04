@@ -89,7 +89,7 @@ export function CreateEntityDialog({ open, onOpenChange, workspaceId }: CreateEn
           </div>
         </form>
         <DialogFooter>
-          <Button variant="outline" onClick={() => { reset(); onOpenChange(false) }}>
+          <Button variant="ghost" onClick={() => { reset(); onOpenChange(false) }}>
             Cancel
           </Button>
           <Button type="submit" form="create-entity-form" disabled={mutation.isPending}>

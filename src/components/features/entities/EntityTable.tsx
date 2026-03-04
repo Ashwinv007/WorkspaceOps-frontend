@@ -38,11 +38,11 @@ export function EntityTable({ entities, workspaceId, onEdit, onDelete }: EntityT
       </TableHeader>
       <TableBody>
         {entities.map((entity) => (
-          <TableRow key={entity.id}>
+          <TableRow key={entity.id} className="hover:bg-muted/40 transition-colors duration-100">
             <TableCell>
               <Link
                 href={`/${workspaceId}/entities/${entity.id}`}
-                className="font-medium hover:underline"
+                className="font-medium hover:underline cursor-pointer"
               >
                 {entity.name}
               </Link>
@@ -54,11 +54,11 @@ export function EntityTable({ entities, workspaceId, onEdit, onDelete }: EntityT
               {format(new Date(entity.createdAt), "MMM d, yyyy")}
             </TableCell>
             <TableCell>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center justify-end gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-9 w-9"
                   onClick={() => onEdit(entity)}
                 >
                   <Pencil className="h-4 w-4" />
@@ -67,7 +67,7 @@ export function EntityTable({ entities, workspaceId, onEdit, onDelete }: EntityT
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    className="h-9 w-9 text-destructive hover:text-destructive"
                     onClick={() => onDelete(entity)}
                   >
                     <Trash2 className="h-4 w-4" />

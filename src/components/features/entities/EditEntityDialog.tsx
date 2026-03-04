@@ -95,7 +95,7 @@ export function EditEntityDialog({ open, onOpenChange, workspaceId, entity }: Ed
           </div>
         </form>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button type="submit" form="edit-entity-form" disabled={mutation.isPending}>

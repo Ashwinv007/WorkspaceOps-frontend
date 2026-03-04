@@ -49,11 +49,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="text-center mb-6">
-        <p className="text-2xl font-bold">WorkspaceOps</p>
+    <div className="w-full">
+      <div className="mb-6 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">WorkspaceOps</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Welcome back</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Sign in to continue managing entities, documents, and work items.
+        </p>
       </div>
-      <Card>
+      <Card className="border-border/80 shadow-sm">
         <CardHeader>
           <CardTitle>Sign in to your account</CardTitle>
           <CardDescription>Enter your email and password below</CardDescription>
@@ -61,23 +65,37 @@ export default function LoginPage() {
         <CardContent>
           <form id="login-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {apiError && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" role="alert" aria-live="polite">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{apiError}</AlertDescription>
               </Alert>
             )}
             <div className="space-y-1">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                aria-invalid={!!errors.email}
+                {...register("email")}
+              />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-destructive" role="alert">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-1">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••" {...register("password")} />
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••"
+                autoComplete="current-password"
+                aria-invalid={!!errors.password}
+                {...register("password")}
+              />
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-destructive" role="alert">{errors.password.message}</p>
               )}
             </div>
           </form>
@@ -98,6 +116,9 @@ export default function LoginPage() {
               "Sign In"
             )}
           </Button>
+          <p className="text-xs text-muted-foreground text-center">
+            After sign in, you will select a workspace.
+          </p>
           <p className="text-sm text-muted-foreground text-center">
             Don&apos;t have an account?{" "}
             <Link href="/signup" className="underline hover:text-foreground">

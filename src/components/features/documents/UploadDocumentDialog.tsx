@@ -242,7 +242,7 @@ export function UploadDocumentDialog({
               Back
             </Button>
           )}
-          <Button variant="outline" onClick={handleClose} disabled={mutation.isPending}>
+          <Button variant="ghost" onClick={handleClose} disabled={mutation.isPending}>
             Cancel
           </Button>
           <Button onClick={handleNext} disabled={mutation.isPending}>

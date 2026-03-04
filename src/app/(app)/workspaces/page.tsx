@@ -8,14 +8,14 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { format } from "date-fns"
 import { fetchWorkspaces, createWorkspace } from "@/lib/api/workspaces"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Loader2, Plus, Building2, LogOut } from "lucide-react"
+import { StatusBadge } from "@/components/shared/StatusBadge"
+import { Loader2, Plus, Building2, LogOut, ChevronRight } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 import { toast } from "sonner"
 
@@ -56,30 +56,26 @@ export default function WorkspacesPage() {
     createMutation.mutate({ tenantId, name: values.name })
   }
 
-  const roleVariant: Record<string, "default" | "secondary" | "outline"> = {
-    OWNER: "default",
-    ADMIN: "secondary",
-    MEMBER: "outline",
-    VIEWER: "outline",
-  }
-
   return (
     <div className="min-h-screen bg-muted/40">
       {/* Header */}
       <header className="border-b bg-background px-8 py-4 flex items-center justify-between">
-        <p className="text-xl font-bold">WorkspaceOps</p>
+        <div className="flex items-center gap-2">
+          <Building2 className="h-4 w-4 text-muted-foreground" />
+          <p className="text-sm font-semibold">WorkspaceOps</p>
+        </div>
         <Button variant="ghost" size="sm" onClick={logout} className="gap-2">
           <LogOut className="h-4 w-4" />
           Sign out
         </Button>
       </header>
 
-      <div className="max-w-4xl mx-auto px-8 py-10">
+      <div className="max-w-2xl mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold">Your Workspaces</h1>
-            <p className="text-muted-foreground mt-1">
-              Select a workspace to continue, or create a new one
+            <h1 className="text-2xl font-semibold tracking-tight">Choose a workspace</h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Select below to continue
             </p>
           </div>
           <Button onClick={() => setDialogOpen(true)} className="gap-2">
@@ -89,42 +85,47 @@ export default function WorkspacesPage() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-40" />
+              <Skeleton key={i} className="h-20" />
             ))}
           </div>
         ) : !workspaces?.length ? (
           <div className="text-center py-20">
-            <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-lg font-medium">You don&apos;t have any workspaces yet</p>
+            <div className="bg-muted/60 rounded-xl p-3 inline-flex mb-4">
+              <Building2 className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <p className="text-base font-semibold">No workspaces yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Create your first workspace to get started.</p>
             <Button className="mt-4" onClick={() => setDialogOpen(true)}>
-              Create your first workspace
+              Create workspace
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="space-y-2">
             {workspaces.map((ws) => (
-              <Card key={ws.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-lg leading-tight">{ws.name}</CardTitle>
-                    <Badge variant={roleVariant[ws.userRole] ?? "outline"}>{ws.userRole}</Badge>
+              <Card
+                key={ws.id}
+                className="cursor-pointer hover:border-foreground/20 hover:shadow-sm transition-all duration-150"
+                onClick={() => router.push(`/${ws.id}/dashboard`)}
+              >
+                <CardHeader className="py-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <div className="min-w-0">
+                        <p className="font-semibold leading-tight truncate">{ws.name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Created {format(new Date(ws.createdAt), "MMM d, yyyy")}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <StatusBadge type="role" value={ws.userRole} />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Created {format(new Date(ws.createdAt), "MMM d, yyyy")}
-                  </p>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    className="w-full"
-                    onClick={() => router.push(`/${ws.id}/dashboard`)}
-                  >
-                    Open →
-                  </Button>
-                </CardFooter>
               </Card>
             ))}
           </div>
@@ -147,7 +148,7 @@ export default function WorkspacesPage() {
             </div>
           </form>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+            <Button variant="ghost" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
             <Button

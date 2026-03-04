@@ -9,18 +9,19 @@ export function OverviewStatCards({ overview }: OverviewStatCardsProps) {
   const entityBreakdown = Object.entries(overview.entities.byRole).map(([label, value]) => ({
     label,
     value,
+    colorClass: "bg-muted-foreground/30",
   }))
 
   const documentBreakdown = [
-    { label: "Valid", value: overview.documents.byStatus.VALID, color: "#16a34a" },
-    { label: "Expiring", value: overview.documents.byStatus.EXPIRING, color: "#d97706" },
-    { label: "Expired", value: overview.documents.byStatus.EXPIRED, color: "#dc2626" },
+    { label: "Valid", value: overview.documents.byStatus.VALID, colorClass: "bg-success" },
+    { label: "Expiring", value: overview.documents.byStatus.EXPIRING, colorClass: "bg-warning" },
+    { label: "Expired", value: overview.documents.byStatus.EXPIRED, colorClass: "bg-destructive" },
   ]
 
   const workItemBreakdown = [
-    { label: "Draft", value: overview.workItems.byStatus.DRAFT },
-    { label: "Active", value: overview.workItems.byStatus.ACTIVE, color: "#2563eb" },
-    { label: "Completed", value: overview.workItems.byStatus.COMPLETED, color: "#16a34a" },
+    { label: "Draft", value: overview.workItems.byStatus.DRAFT, colorClass: "bg-muted-foreground/30" },
+    { label: "Active", value: overview.workItems.byStatus.ACTIVE, colorClass: "bg-info" },
+    { label: "Completed", value: overview.workItems.byStatus.COMPLETED, colorClass: "bg-success" },
   ]
 
   return (

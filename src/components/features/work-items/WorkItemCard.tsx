@@ -8,7 +8,7 @@ import { WorkItem } from "@/lib/types/api"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { CalendarDays } from "lucide-react"
+import { CalendarDays, User2, Check } from "lucide-react"
 import { toast } from "sonner"
 
 interface WorkItemCardProps {
@@ -36,25 +36,28 @@ export function WorkItemCard({ workItem, entityName, workspaceId }: WorkItemCard
   })
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col hover:shadow-sm transition-shadow duration-150">
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <Link
-            href={`/${workspaceId}/work-items/${workItem.id}`}
-            className="font-medium hover:underline leading-tight"
-          >
-            {workItem.title}
-          </Link>
-          {workItem.priority && (
+        {workItem.priority && (
+          <div className="mb-1">
             <StatusBadge type="priority" value={workItem.priority} />
-          )}
-        </div>
+          </div>
+        )}
+        <Link
+          href={`/${workspaceId}/work-items/${workItem.id}`}
+          className="font-medium hover:underline leading-tight cursor-pointer"
+        >
+          {workItem.title}
+        </Link>
       </CardHeader>
       <CardContent className="flex-1 pb-2">
-        <p className="text-sm text-muted-foreground">{entityName}</p>
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <User2 className="h-3.5 w-3.5 shrink-0" />
+          <span>{entityName}</span>
+        </div>
         {workItem.dueDate && (
-          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-            <CalendarDays className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
+            <CalendarDays className="h-4 w-4 shrink-0" />
             {format(new Date(workItem.dueDate), "MMM d, yyyy")}
           </div>
         )}
@@ -68,7 +71,7 @@ export function WorkItemCard({ workItem, entityName, workspaceId }: WorkItemCard
             disabled={mutation.isPending}
             onClick={() => mutation.mutate("ACTIVE")}
           >
-            Start →
+            Start
           </Button>
         )}
         {workItem.status === "ACTIVE" && (
@@ -80,16 +83,17 @@ export function WorkItemCard({ workItem, entityName, workspaceId }: WorkItemCard
               disabled={mutation.isPending}
               onClick={() => mutation.mutate("DRAFT")}
             >
-              Unstart
+              To Draft
             </Button>
             <Button
               size="sm"
               variant="outline"
-              className="flex-1"
+              className="flex-1 gap-1"
               disabled={mutation.isPending}
               onClick={() => mutation.mutate("COMPLETED")}
             >
-              Complete ✓
+              <Check className="h-3.5 w-3.5" />
+              Complete
             </Button>
           </>
         )}

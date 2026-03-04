@@ -179,7 +179,7 @@ export function EditWorkItemDialog({
         </form>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button type="submit" form="edit-wi-form" disabled={mutation.isPending}>
             {mutation.isPending && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
             Save

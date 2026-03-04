@@ -106,7 +106,7 @@ export function InviteMemberDialog({ open, onOpenChange, workspaceId }: InviteMe
           </div>
         </form>
         <DialogFooter>
-          <Button variant="outline" onClick={() => { reset(); setApiError(null); onOpenChange(false) }}>
+          <Button variant="ghost" onClick={() => { reset(); setApiError(null); onOpenChange(false) }}>
             Cancel
           </Button>
           <Button type="submit" form="invite-form" disabled={mutation.isPending}>

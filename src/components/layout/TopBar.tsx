@@ -33,7 +33,7 @@ export function TopBar({ workspaceId, workspaceName }: TopBarProps) {
   const pageSegments = wsIndex >= 0 ? segments.slice(wsIndex + 1) : []
 
   return (
-    <header className="h-12 border-b flex items-center justify-between px-6 shrink-0">
+    <header className="h-14 border-b bg-background flex items-center justify-between px-6 shrink-0">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -63,7 +63,7 @@ export function TopBar({ workspaceId, workspaceName }: TopBarProps) {
       </Breadcrumb>
 
       {userRole && (
-        <Badge variant="outline" className="text-xs">
+        <Badge variant="secondary" className="text-xs font-medium">
           {userRole}
         </Badge>
       )}

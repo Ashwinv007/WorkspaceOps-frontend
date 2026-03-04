@@ -51,11 +51,11 @@ export function WorkItemTable({
       </TableHeader>
       <TableBody>
         {workItems.map((item) => (
-          <TableRow key={item.id}>
+          <TableRow key={item.id} className="hover:bg-muted/40 transition-colors duration-100">
             <TableCell>
               <Link
                 href={`/${workspaceId}/work-items/${item.id}`}
-                className="font-medium hover:underline"
+                className="font-medium hover:underline cursor-pointer"
               >
                 {item.title}
               </Link>
@@ -80,12 +80,12 @@ export function WorkItemTable({
               {item.dueDate ? format(new Date(item.dueDate), "MMM d, yyyy") : "—"}
             </TableCell>
             <TableCell>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center justify-end gap-1">
                 {onEdit && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-9 w-9"
                     onClick={() => onEdit(item)}
                   >
                     <Pencil className="h-4 w-4" />
@@ -95,7 +95,7 @@ export function WorkItemTable({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    className="h-9 w-9 text-destructive hover:text-destructive"
                     onClick={() => onDelete(item)}
                   >
                     <Trash2 className="h-4 w-4" />

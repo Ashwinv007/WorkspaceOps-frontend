@@ -220,7 +220,7 @@ export function CreateDocumentTypeDialog({ open, onOpenChange, workspaceId }: Cr
         </form>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => { reset(); onOpenChange(false) }}>Cancel</Button>
+          <Button variant="ghost" onClick={() => { reset(); onOpenChange(false) }}>Cancel</Button>
           <Button type="submit" form="create-dt-form" disabled={mutation.isPending}>
             {mutation.isPending && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
             Create

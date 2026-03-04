@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle, ArrowRight } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface AlertBannerProps {
@@ -16,15 +16,16 @@ export function AlertBanner({ expiring, expired, workspaceId }: AlertBannerProps
   if (expiring > 0) parts.push(`${expiring} expiring soon`)
 
   return (
-    <Alert className="border-amber-300 bg-amber-50 text-amber-900">
-      <AlertTriangle className="h-4 w-4 text-amber-600" />
+    <Alert className="border-warning/30 bg-warning/8 text-foreground">
+      <AlertTriangle className="h-4 w-4 text-warning-foreground" />
       <AlertDescription className="flex items-center justify-between">
         <span>You have {parts.join(" and ")} document{parts.length > 1 || (expiring + expired) !== 1 ? "s" : ""}.</span>
         <Link
           href={`/${workspaceId}/documents/expiring`}
-          className="font-medium underline hover:no-underline ml-4 whitespace-nowrap"
+          className="flex items-center gap-1 font-medium underline hover:no-underline ml-4 whitespace-nowrap"
         >
-          View expiring documents →
+          Review documents
+          <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </AlertDescription>
     </Alert>

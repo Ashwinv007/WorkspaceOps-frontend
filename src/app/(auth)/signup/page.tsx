@@ -52,11 +52,15 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="text-center mb-6">
-        <p className="text-2xl font-bold">WorkspaceOps</p>
+    <div className="w-full">
+      <div className="mb-6 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">WorkspaceOps</p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Create an account</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Start managing your workspace operations today.
+        </p>
       </div>
-      <Card>
+      <Card className="border-border/80 shadow-sm">
         <CardHeader>
           <CardTitle>Create your account</CardTitle>
           <CardDescription>Start tracking your workspace operations</CardDescription>
@@ -64,28 +68,48 @@ export default function SignupPage() {
         <CardContent>
           <form id="signup-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {apiError && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" role="alert" aria-live="polite">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{apiError}</AlertDescription>
               </Alert>
             )}
             <div className="space-y-1">
-              <Label htmlFor="name">Name (optional)</Label>
-              <Input id="name" type="text" placeholder="John Doe" {...register("name")} />
+              <Label htmlFor="name">Name <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                autoComplete="name"
+                {...register("name")}
+              />
             </div>
             <div className="space-y-1">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                aria-invalid={!!errors.email}
+                {...register("email")}
+              />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-destructive" role="alert">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-1">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••" {...register("password")} />
-              <p className="text-sm text-muted-foreground">Minimum 6 characters</p>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••"
+                autoComplete="new-password"
+                aria-invalid={!!errors.password}
+                {...register("password")}
+              />
+              <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-destructive" role="alert">{errors.password.message}</p>
               )}
             </div>
           </form>
