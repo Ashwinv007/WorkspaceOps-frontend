@@ -14,7 +14,7 @@ export async function fetchEntityById(workspaceId: string, entityId: string): Pr
 
 export async function fetchEntityDocuments(workspaceId: string, entityId: string): Promise<Document[]> {
   const res = await api.get(`/workspaces/${workspaceId}/entities/${entityId}/documents`)
-  return res.data
+  return res.data.documents
 }
 
 export async function fetchEntityWorkItems(workspaceId: string, entityId: string): Promise<WorkItemListResponse> {
@@ -33,7 +33,7 @@ export async function createEntity(
 export async function updateEntity(
   workspaceId: string,
   entityId: string,
-  data: { name?: string; role?: string }
+  data: { name?: string; role?: string; parentId?: string | null }
 ): Promise<Entity> {
   const res = await api.put(`/workspaces/${workspaceId}/entities/${entityId}`, data)
   return res.data

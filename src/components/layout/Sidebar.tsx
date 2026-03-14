@@ -18,7 +18,6 @@ import {
   Building2,
   ChevronsUpDown,
   LogOut,
-  UserCircle,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -102,10 +101,6 @@ export function Sidebar({ workspaceId, workspaceName }: SidebarProps) {
 
       {/* User section */}
       <div className="p-3 border-t">
-        <div className="flex items-center gap-2 px-3 py-1.5 mb-0.5">
-          <UserCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <span className="text-sm truncate text-muted-foreground">Account</span>
-        </div>
         <Button
           variant="ghost"
           className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"

@@ -21,7 +21,7 @@ export function AlertBanner({ expiring, expired, workspaceId }: AlertBannerProps
       <AlertDescription className="flex items-center justify-between">
         <span>You have {parts.join(" and ")} document{parts.length > 1 || (expiring + expired) !== 1 ? "s" : ""}.</span>
         <Link
-          href={`/${workspaceId}/documents/expiring`}
+          href={`/${workspaceId}/documents?expiryStatus=${expired > 0 && expiring === 0 ? "EXPIRED" : "EXPIRING"}`}
           className="flex items-center gap-1 font-medium underline hover:no-underline ml-4 whitespace-nowrap"
         >
           Review documents

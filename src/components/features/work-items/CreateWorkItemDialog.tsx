@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { format } from "date-fns"
-import { CalendarIcon, Loader2 } from "lucide-react"
+import { CalendarIcon, Check, ChevronsUpDown, Loader2, Search } from "lucide-react"
 import { createWorkItem } from "@/lib/api/work-items"
 import { Entity, WorkItemType } from "@/lib/types/api"
 import { Button } from "@/components/ui/button"
@@ -61,6 +61,8 @@ export function CreateWorkItemDialog({
   const queryClient = useQueryClient()
   const [dueDate, setDueDate] = useState<Date | undefined>()
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const [entityOpen, setEntityOpen] = useState(false)
+  const [entitySearch, setEntitySearch] = useState("")
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -92,6 +94,11 @@ export function CreateWorkItemDialog({
   const entityValue = watch("entityId")
   const priorityValue = watch("priority")
 
+  const selectedWorkItemType = workItemTypes.find((t) => t.id === typeValue)
+  const filteredEntities = entities.filter(
+    (e) => !selectedWorkItemType?.entityType || e.role === selectedWorkItemType.entityType
+  )
+
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); setDueDate(undefined) } onOpenChange(v) }}>
       <DialogContent className="max-w-lg">
@@ -104,7 +111,7 @@ export function CreateWorkItemDialog({
 
           <div className="space-y-1">
             <Label>Work Item Type <span className="text-destructive">*</span></Label>
-            <Select value={typeValue} onValueChange={(v) => setValue("workItemTypeId", v)}>
+            <Select value={typeValue} onValueChange={(v) => { setValue("workItemTypeId", v); setValue("entityId", "") }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
@@ -119,16 +126,49 @@ export function CreateWorkItemDialog({
 
           <div className="space-y-1">
             <Label>Entity <span className="text-destructive">*</span></Label>
-            <Select value={entityValue} onValueChange={(v) => setValue("entityId", v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select entity" />
-              </SelectTrigger>
-              <SelectContent>
-                {entities.map((e) => (
-                  <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={entityOpen} onOpenChange={setEntityOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                  {entityValue
+                    ? (filteredEntities.find((e) => e.id === entityValue)?.name ?? "Select entity")
+                    : "Select entity"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <div className="flex items-center border-b px-3">
+                  <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                  <input
+                    className="flex h-9 w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
+                    placeholder="Search entities..."
+                    value={entitySearch}
+                    onChange={(e) => setEntitySearch(e.target.value)}
+                  />
+                </div>
+                <div className="max-h-48 overflow-y-auto p-1">
+                  {filteredEntities.filter((e) => e.name.toLowerCase().includes(entitySearch.toLowerCase())).length === 0 ? (
+                    <p className="py-4 text-center text-sm text-muted-foreground">No entities found.</p>
+                  ) : (
+                    filteredEntities
+                      .filter((e) => e.name.toLowerCase().includes(entitySearch.toLowerCase()))
+                      .map((e) => (
+                        <button
+                          key={e.id}
+                          type="button"
+                          onClick={() => { setValue("entityId", e.id); setEntityOpen(false); setEntitySearch("") }}
+                          className={cn(
+                            "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                            entityValue === e.id && "bg-accent"
+                          )}
+                        >
+                          <Check className={cn("mr-2 h-4 w-4", entityValue === e.id ? "opacity-100" : "opacity-0")} />
+                          {e.name}
+                        </button>
+                      ))
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
             {errors.entityId && <p className="text-sm text-destructive">{errors.entityId.message}</p>}
           </div>
 

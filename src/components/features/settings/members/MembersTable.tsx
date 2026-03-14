@@ -61,7 +61,7 @@ export function MembersTable({ members, workspaceId, currentUserId }: MembersTab
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>User ID</TableHead>
+            <TableHead>User</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Joined</TableHead>
             <TableHead className="w-[60px]">Actions</TableHead>
@@ -70,7 +70,12 @@ export function MembersTable({ members, workspaceId, currentUserId }: MembersTab
         <TableBody>
           {members.map((member) => (
             <TableRow key={member.id}>
-              <TableCell className="font-mono text-sm">{member.userId}</TableCell>
+              <TableCell>
+                <div className="text-sm font-medium">{member.userName ?? member.userEmail ?? member.userId}</div>
+                {(member.userName || member.userEmail) && (
+                  <div className="text-xs text-muted-foreground">{member.userEmail}</div>
+                )}
+              </TableCell>
               <TableCell>
                 {member.role === "OWNER" ? (
                   <span className="text-sm font-medium">Owner</span>

@@ -16,7 +16,7 @@ export default function DashboardPage({ params }: { params: Promise<{ workspaceI
   const { workspaceId } = use(params)
   const { isAdmin } = useWorkspaceRole()
 
-  const { data: overview, isLoading } = useQuery({
+  const { data: overview, isLoading, isError } = useQuery({
     queryKey: ["overview", workspaceId],
     queryFn: () => fetchOverview(workspaceId),
   })
@@ -34,6 +34,19 @@ export default function DashboardPage({ params }: { params: Promise<{ workspaceI
           <Skeleton className="h-60" />
           <Skeleton className="h-60" />
         </div>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="page-shell">
+        <div className="border-b border-border pb-5">
+          <h1 className="page-title">Dashboard</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Could not load workspace overview. Please try refreshing the page.
+        </p>
       </div>
     )
   }

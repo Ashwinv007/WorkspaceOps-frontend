@@ -1,4 +1,4 @@
-import { WorkItem, Entity, WorkItemStatus } from "@/lib/types/api"
+import { WorkItem, Entity, WorkItemType, WorkItemStatus } from "@/lib/types/api"
 import { WorkItemCard } from "./WorkItemCard"
 import { Badge } from "@/components/ui/badge"
 
@@ -11,10 +11,22 @@ const COLUMNS: { status: WorkItemStatus; label: string }[] = [
 interface WorkItemKanbanProps {
   workItems: WorkItem[]
   entitiesMap: Map<string, Entity>
+  workItemTypesMap: Map<string, WorkItemType>
   workspaceId: string
+  isAdmin?: boolean
+  onEdit?: (item: WorkItem) => void
+  onDelete?: (item: WorkItem) => void
 }
 
-export function WorkItemKanban({ workItems, entitiesMap, workspaceId }: WorkItemKanbanProps) {
+export function WorkItemKanban({
+  workItems,
+  entitiesMap,
+  workItemTypesMap,
+  workspaceId,
+  isAdmin,
+  onEdit,
+  onDelete,
+}: WorkItemKanbanProps) {
   return (
     <div className="grid grid-cols-3 gap-4">
       {COLUMNS.map(({ status, label }) => {
@@ -30,7 +42,11 @@ export function WorkItemKanban({ workItems, entitiesMap, workspaceId }: WorkItem
                 key={item.id}
                 workItem={item}
                 entityName={entitiesMap.get(item.entityId)?.name ?? "—"}
+                typeName={workItemTypesMap.get(item.workItemTypeId)?.name}
                 workspaceId={workspaceId}
+                isAdmin={isAdmin}
+                onEdit={onEdit}
+                onDelete={onDelete}
               />
             ))}
             {items.length === 0 && (

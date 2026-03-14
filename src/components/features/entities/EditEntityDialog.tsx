@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { updateEntity } from "@/lib/api/entities"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { updateEntity, fetchEntities } from "@/lib/api/entities"
 import { Entity } from "@/lib/types/api"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
@@ -42,19 +42,29 @@ interface EditEntityDialogProps {
 
 export function EditEntityDialog({ open, onOpenChange, workspaceId, entity }: EditEntityDialogProps) {
   const queryClient = useQueryClient()
+  const [parentId, setParentId] = useState<string>(entity.parentId ?? "")
+
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { name: entity.name, role: entity.role },
   })
 
+  const { data: allEntities } = useQuery({
+    queryKey: ["entities", workspaceId, ""],
+    queryFn: () => fetchEntities(workspaceId),
+    enabled: open,
+  })
+
   useEffect(() => {
     if (open) {
       reset({ name: entity.name, role: entity.role })
+      setParentId(entity.parentId ?? "")
     }
   }, [open, entity, reset])
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) => updateEntity(workspaceId, entity.id, values),
+    mutationFn: (values: FormValues) =>
+      updateEntity(workspaceId, entity.id, { ...values, parentId: parentId || null }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entities", workspaceId] })
       queryClient.invalidateQueries({ queryKey: ["entity", workspaceId, entity.id] })
@@ -65,6 +75,10 @@ export function EditEntityDialog({ open, onOpenChange, workspaceId, entity }: Ed
   })
 
   const roleValue = watch("role")
+  const showParent = roleValue === "EMPLOYEE"
+  const parentCandidates = (allEntities?.entities ?? []).filter(
+    (e) => e.id !== entity.id && e.role !== "EMPLOYEE"
+  )
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -80,7 +94,7 @@ export function EditEntityDialog({ open, onOpenChange, workspaceId, entity }: Ed
           </div>
           <div className="space-y-1">
             <Label>Role</Label>
-            <Select value={roleValue} onValueChange={(v) => setValue("role", v as FormValues["role"])}>
+            <Select value={roleValue} onValueChange={(v) => { setValue("role", v as FormValues["role"]); setParentId("") }}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -93,6 +107,22 @@ export function EditEntityDialog({ open, onOpenChange, workspaceId, entity }: Ed
             </Select>
             {errors.role && <p className="text-sm text-destructive">{errors.role.message}</p>}
           </div>
+          {showParent && (
+            <div className="space-y-1">
+              <Label>Belongs To (optional)</Label>
+              <Select value={parentId || "__none__"} onValueChange={(v) => setParentId(v === "__none__" ? "" : v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="None" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
+                  {parentCandidates.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>{e.name} ({e.role})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </form>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>

@@ -173,7 +173,11 @@ export default function WorkItemsPage({ params }: { params: Promise<{ workspaceI
         <WorkItemKanban
           workItems={data.workItems}
           entitiesMap={entitiesMap}
+          workItemTypesMap={workItemTypesMap}
           workspaceId={workspaceId}
+          isAdmin={isAdmin}
+          onEdit={setEditItem}
+          onDelete={isAdmin ? setDeleteTarget : undefined}
         />
       ) : (
         <WorkItemTable

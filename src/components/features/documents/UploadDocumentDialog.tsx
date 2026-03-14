@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { format } from "date-fns"
-import { CalendarIcon, Loader2 } from "lucide-react"
+import { CalendarIcon, Check, ChevronsUpDown, Loader2, Search } from "lucide-react"
 import { uploadDocument } from "@/lib/api/documents"
 import { DocumentType, Entity } from "@/lib/types/api"
 import { FileUploadZone } from "@/components/shared/FileUploadZone"
@@ -54,6 +54,8 @@ export function UploadDocumentDialog({
   const [selectedEntityId, setSelectedEntityId] = useState(defaultEntityId ?? "")
   const [expiryDate, setExpiryDate] = useState<Date | undefined>()
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const [entityOpen, setEntityOpen] = useState(false)
+  const [entitySearch, setEntitySearch] = useState("")
   const [fileError, setFileError] = useState("")
   const [docTypeError, setDocTypeError] = useState("")
 
@@ -62,6 +64,9 @@ export function UploadDocumentDialog({
   })
 
   const selectedDocType = documentTypes.find((dt) => dt.id === selectedDocTypeId)
+  const filteredEntities = entities.filter(
+    (e) => !selectedDocType?.entityType || e.role === selectedDocType.entityType
+  )
 
   function totalSteps() {
     let steps = 1
@@ -138,6 +143,7 @@ export function UploadDocumentDialog({
     setSelectedDocTypeId("")
     setSelectedEntityId(defaultEntityId ?? "")
     setExpiryDate(undefined)
+    setEntitySearch("")
     setFileError("")
     setDocTypeError("")
     resetForm()
@@ -170,7 +176,7 @@ export function UploadDocumentDialog({
               <Label>Document Type <span className="text-destructive">*</span></Label>
               <Select
                 value={selectedDocTypeId}
-                onValueChange={(v) => { setSelectedDocTypeId(v); setDocTypeError("") }}
+                onValueChange={(v) => { setSelectedDocTypeId(v); setDocTypeError(""); setSelectedEntityId("") }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
@@ -186,17 +192,56 @@ export function UploadDocumentDialog({
 
             <div className="space-y-1">
               <Label>Entity (optional)</Label>
-              <Select value={selectedEntityId || "__none__"} onValueChange={(v) => setSelectedEntityId(v === "__none__" ? "" : v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">None</SelectItem>
-                  {entities.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={entityOpen} onOpenChange={setEntityOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                    {selectedEntityId
+                      ? (filteredEntities.find((e) => e.id === selectedEntityId)?.name ?? "None")
+                      : "None"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                  <div className="flex items-center border-b px-3">
+                    <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <input
+                      className="flex h-9 w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
+                      placeholder="Search entities..."
+                      value={entitySearch}
+                      onChange={(e) => setEntitySearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="max-h-48 overflow-y-auto p-1">
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedEntityId(""); setEntityOpen(false); setEntitySearch("") }}
+                      className={cn(
+                        "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                        !selectedEntityId && "bg-accent"
+                      )}
+                    >
+                      <Check className={cn("mr-2 h-4 w-4", !selectedEntityId ? "opacity-100" : "opacity-0")} />
+                      None
+                    </button>
+                    {filteredEntities
+                      .filter((e) => e.name.toLowerCase().includes(entitySearch.toLowerCase()))
+                      .map((e) => (
+                        <button
+                          key={e.id}
+                          type="button"
+                          onClick={() => { setSelectedEntityId(e.id); setEntityOpen(false); setEntitySearch("") }}
+                          className={cn(
+                            "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                            selectedEntityId === e.id && "bg-accent"
+                          )}
+                        >
+                          <Check className={cn("mr-2 h-4 w-4", selectedEntityId === e.id ? "opacity-100" : "opacity-0")} />
+                          {e.name}
+                        </button>
+                      ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         )}

@@ -11,14 +11,22 @@ import {
 } from "@/components/ui/table"
 
 function getActionCategory(action: string): string {
-  if (action.startsWith("auth.")) return "auth"
-  if (action.startsWith("workspace.")) return "workspace"
-  if (action.startsWith("entity.")) return "entity"
-  if (action.startsWith("documentType.")) return "documentType"
-  if (action.startsWith("document.")) return "document"
-  if (action.startsWith("workItemType.")) return "workItemType"
-  if (action.startsWith("workItem.")) return "workItem"
+  if (action.startsWith("USER_")) return "auth"
+  if (action.startsWith("WORKSPACE_MEMBER")) return "workspace"
+  if (action === "WORKSPACE_CREATED") return "workspace"
+  if (action.startsWith("ENTITY_")) return "entity"
+  if (action.startsWith("DOCUMENT_TYPE_")) return "documentType"
+  if (action.startsWith("DOCUMENT_")) return "document"
+  if (action.startsWith("WORK_ITEM_TYPE_")) return "workItemType"
+  if (action.startsWith("WORK_ITEM_")) return "workItem"
   return "other"
+}
+
+function formatActionLabel(action: string): string {
+  return action
+    .split("_")
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(" ")
 }
 
 const CATEGORY_CLASSES: Record<string, string> = {
@@ -42,7 +50,7 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
       <TableHeader>
         <TableRow>
           <TableHead>Timestamp</TableHead>
-          <TableHead>User ID</TableHead>
+          <TableHead>User</TableHead>
           <TableHead>Action</TableHead>
           <TableHead>Target Type</TableHead>
           <TableHead>Target ID</TableHead>
@@ -56,13 +64,13 @@ export function AuditLogTable({ logs }: AuditLogTableProps) {
               <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                 {format(new Date(log.createdAt), "MMM d, yyyy HH:mm")}
               </TableCell>
-              <TableCell className="font-mono text-xs">{log.userId}</TableCell>
+              <TableCell className="text-sm">{log.userEmail ?? log.userId}</TableCell>
               <TableCell>
                 <Badge
                   variant="outline"
                   className={CATEGORY_CLASSES[category] ?? ""}
                 >
-                  {log.action}
+                  {formatActionLabel(log.action)}
                 </Badge>
               </TableCell>
               <TableCell className="text-sm">{log.targetType}</TableCell>

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
@@ -24,16 +23,15 @@ type FormValues = z.infer<typeof schema>
 
 export default function SignupPage() {
   const router = useRouter()
-  const [apiError, setApiError] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   async function onSubmit(values: FormValues) {
-    setApiError(null)
     try {
       const res = await signup(values.email, values.password, values.name)
       localStorage.setItem("workspaceops_token", res.data.token)
@@ -41,13 +39,10 @@ export default function SignupPage() {
       router.push(`/${res.data.workspaceId}/dashboard`)
     } catch (err: unknown) {
       const status = (err as { response?: { status: number } })?.response?.status
-      if (status === 409) {
-        setApiError("An account with this email already exists")
-      } else if (status === 400) {
-        setApiError("Please check your details and try again.")
-      } else {
-        setApiError("Something went wrong. Please try again.")
-      }
+      let message = "Something went wrong. Please try again."
+      if (status === 409) message = "An account with this email already exists"
+      else if (status === 400) message = "Please check your details and try again."
+      setError("root", { message })
     }
   }
 
@@ -67,10 +62,10 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <form id="signup-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {apiError && (
+            {errors.root && (
               <Alert variant="destructive" role="alert" aria-live="polite">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{apiError}</AlertDescription>
+                <AlertDescription>{errors.root.message}</AlertDescription>
               </Alert>
             )}
             <div className="space-y-1">

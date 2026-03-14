@@ -8,7 +8,7 @@ export async function fetchWorkspaces(): Promise<Workspace[]> {
 
 export async function createWorkspace(tenantId: string, name: string): Promise<Workspace> {
   const res = await api.post("/workspaces", { tenantId, name })
-  return res.data
+  return res.data.data
 }
 
 export async function fetchMembers(workspaceId: string): Promise<MembersListResponse> {

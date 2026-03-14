@@ -29,6 +29,8 @@ export interface WorkspaceMember {
   id: string
   workspaceId: string
   userId: string
+  userEmail: string | null
+  userName: string | null
   role: WorkspaceRole
   createdAt: string
 }
@@ -38,6 +40,7 @@ export interface Entity {
   workspaceId: string
   name: string
   role: EntityRole
+  parentId: string | null
   createdAt: string
 }
 
@@ -56,6 +59,7 @@ export interface DocumentType {
   name: string
   hasMetadata: boolean
   hasExpiry: boolean
+  entityType?: EntityRole | null
   fields: DocumentTypeField[]
   createdAt: string
 }
@@ -94,6 +98,8 @@ export interface WorkItem {
   workItemTypeId: string
   entityId: string
   assignedToUserId: string
+  assignedToUserEmail: string | null
+  assignedToUserName: string | null
   title: string
   description?: string
   status: WorkItemStatus
@@ -108,6 +114,8 @@ export interface AuditLog {
   id: string
   workspaceId: string
   userId: string
+  userEmail: string | null
+  userName: string | null
   action: string
   targetType: string
   targetId?: string
@@ -213,11 +221,13 @@ export interface SignupResponse {
 export interface CreateEntityDto {
   name: string
   role: EntityRole
+  parentId?: string
 }
 
 export interface UpdateEntityDto {
   name?: string
   role?: EntityRole
+  parentId?: string | null
 }
 
 export interface CreateDocumentTypeDto {

@@ -11,6 +11,7 @@ import { useDownloadDocument } from "@/lib/hooks/useDownloadDocument"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
 import { EditEntityDialog } from "@/components/features/entities/EditEntityDialog"
+import { CreateEntityDialog } from "@/components/features/entities/CreateEntityDialog"
 import { UploadDocumentDialog } from "@/components/features/documents/UploadDocumentDialog"
 import { CreateWorkItemDialog } from "@/components/features/work-items/CreateWorkItemDialog"
 import { Button } from "@/components/ui/button"
@@ -45,6 +46,7 @@ export default function EntityDetailPage({
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [createWorkItemOpen, setCreateWorkItemOpen] = useState(false)
+  const [addEmployeeOpen, setAddEmployeeOpen] = useState(false)
 
   const { data: entity, isLoading } = useQuery({
     queryKey: ["entity", workspaceId, entityId],
@@ -77,6 +79,10 @@ export default function EntityDetailPage({
     queryKey: ["entities", workspaceId],
     queryFn: () => fetchEntities(workspaceId),
   })
+
+  const employees = (entitiesData?.entities ?? []).filter(
+    (e) => e.parentId === entityId
+  )
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteEntity(workspaceId, entityId),
@@ -148,6 +154,11 @@ export default function EntityDetailPage({
           <TabsTrigger value="work-items">
             Work Items {workItemsData ? `(${workItemsData.count})` : ""}
           </TabsTrigger>
+          {entity.role !== "EMPLOYEE" && (
+            <TabsTrigger value="employees">
+              Employees {employees.length > 0 ? `(${employees.length})` : ""}
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="documents" className="mt-4">
@@ -249,6 +260,46 @@ export default function EntityDetailPage({
             </Table>
           )}
         </TabsContent>
+
+        {entity.role !== "EMPLOYEE" && (
+          <TabsContent value="employees" className="mt-4">
+            <div className="flex justify-end mb-3">
+              <Button size="sm" onClick={() => setAddEmployeeOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Employee
+              </Button>
+            </div>
+            {!employees.length ? (
+              <p className="text-sm text-muted-foreground py-8 text-center">No employees linked to this entity.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Role</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {employees.map((emp) => (
+                    <TableRow key={emp.id}>
+                      <TableCell>
+                        <Link
+                          href={`/${workspaceId}/entities/${emp.id}`}
+                          className="font-medium hover:underline"
+                        >
+                          {emp.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge type="entityRole" value={emp.role} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* Dialogs */}
@@ -286,6 +337,13 @@ export default function EntityDetailPage({
           defaultEntityId={entityId}
         />
       )}
+      <CreateEntityDialog
+        open={addEmployeeOpen}
+        onOpenChange={setAddEmployeeOpen}
+        workspaceId={workspaceId}
+        defaultRole="EMPLOYEE"
+        defaultParentId={entityId}
+      />
     </div>
   )
 }

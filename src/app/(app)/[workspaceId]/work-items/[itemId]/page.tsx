@@ -228,7 +228,7 @@ export default function WorkItemDetailPage({
         )}
         <div>
           <p className="text-muted-foreground">Assigned To</p>
-          <p className="font-medium">{workItem.assignedToUserId}</p>
+          <p className="font-medium">{workItem.assignedToUserName ?? workItem.assignedToUserEmail ?? workItem.assignedToUserId}</p>
         </div>
         <div>
           <p className="text-muted-foreground">Created</p>

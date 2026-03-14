@@ -1,10 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { createEntity } from "@/lib/api/entities"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createEntity, fetchEntities } from "@/lib/api/entities"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -35,20 +36,33 @@ interface CreateEntityDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   workspaceId: string
+  defaultRole?: FormValues["role"]
+  defaultParentId?: string
 }
 
-export function CreateEntityDialog({ open, onOpenChange, workspaceId }: CreateEntityDialogProps) {
+export function CreateEntityDialog({ open, onOpenChange, workspaceId, defaultRole, defaultParentId }: CreateEntityDialogProps) {
   const queryClient = useQueryClient()
+  const [parentId, setParentId] = useState(defaultParentId ?? "")
+
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
+    defaultValues: { name: "", role: defaultRole },
+  })
+
+  const { data: allEntities } = useQuery({
+    queryKey: ["entities", workspaceId, ""],
+    queryFn: () => fetchEntities(workspaceId),
+    enabled: open,
   })
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) => createEntity(workspaceId, values),
+    mutationFn: (values: FormValues) =>
+      createEntity(workspaceId, { ...values, ...(parentId ? { parentId } : {}) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entities", workspaceId] })
       toast.success("Entity created")
-      reset()
+      reset({ name: "", role: defaultRole })
+      setParentId(defaultParentId ?? "")
       onOpenChange(false)
     },
     onError: () => toast.error("Failed to create entity"),
@@ -59,9 +73,11 @@ export function CreateEntityDialog({ open, onOpenChange, workspaceId }: CreateEn
   }
 
   const roleValue = watch("role")
+  const showParent = roleValue === "EMPLOYEE" && !defaultParentId
+  const parentCandidates = (allEntities?.entities ?? []).filter((e) => e.role !== "EMPLOYEE")
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v) }}>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) { reset({ name: "", role: defaultRole }); setParentId(defaultParentId ?? "") } onOpenChange(v) }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Entity</DialogTitle>
@@ -74,7 +90,7 @@ export function CreateEntityDialog({ open, onOpenChange, workspaceId }: CreateEn
           </div>
           <div className="space-y-1">
             <Label>Role</Label>
-            <Select value={roleValue} onValueChange={(v) => setValue("role", v as FormValues["role"])}>
+            <Select value={roleValue} onValueChange={(v) => { setValue("role", v as FormValues["role"]); setParentId("") }} disabled={!!defaultRole}>
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
@@ -87,9 +103,25 @@ export function CreateEntityDialog({ open, onOpenChange, workspaceId }: CreateEn
             </Select>
             {errors.role && <p className="text-sm text-destructive">{errors.role.message}</p>}
           </div>
+          {showParent && (
+            <div className="space-y-1">
+              <Label>Belongs To (optional)</Label>
+              <Select value={parentId || "__none__"} onValueChange={(v) => setParentId(v === "__none__" ? "" : v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="None" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
+                  {parentCandidates.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>{e.name} ({e.role})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </form>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => { reset(); onOpenChange(false) }}>
+          <Button variant="ghost" onClick={() => { reset({ name: "", role: defaultRole }); setParentId(defaultParentId ?? ""); onOpenChange(false) }}>
             Cancel
           </Button>
           <Button type="submit" form="create-entity-form" disabled={mutation.isPending}>

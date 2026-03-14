@@ -1,6 +1,7 @@
 "use client"
 
 import { use, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { fetchDocuments, deleteDocument } from "@/lib/api/documents"
 import { fetchEntities } from "@/lib/api/entities"
@@ -29,8 +30,12 @@ export default function DocumentsPage({ params }: { params: Promise<{ workspaceI
   const { workspaceId } = use(params)
   const queryClient = useQueryClient()
   const { isAdmin } = useWorkspaceRole()
+  const searchParams = useSearchParams()
 
-  const [statusFilter, setStatusFilter] = useState("")
+  const [statusFilter, setStatusFilter] = useState(() => {
+    const s = searchParams.get("expiryStatus")
+    return s === "EXPIRING" || s === "EXPIRED" || s === "VALID" ? s : ""
+  })
   const [docTypeFilter, setDocTypeFilter] = useState("")
   const [entityFilter, setEntityFilter] = useState("")
   const [uploadOpen, setUploadOpen] = useState(false)

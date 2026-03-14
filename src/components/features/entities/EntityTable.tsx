@@ -26,18 +26,23 @@ interface EntityTableProps {
 export function EntityTable({ entities, workspaceId, onEdit, onDelete }: EntityTableProps) {
   const { isAdmin } = useWorkspaceRole()
 
+  const entityMap = new Map<string, Entity>(entities.map((e) => [e.id, e]))
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Name</TableHead>
           <TableHead>Role</TableHead>
+          <TableHead>Belongs To</TableHead>
           <TableHead>Created</TableHead>
           <TableHead className="w-[100px]">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {entities.map((entity) => (
+        {entities.map((entity) => {
+          const parent = entity.parentId ? entityMap.get(entity.parentId) : null
+          return (
           <TableRow key={entity.id} className="hover:bg-muted/40 transition-colors duration-100">
             <TableCell>
               <Link
@@ -49,6 +54,13 @@ export function EntityTable({ entities, workspaceId, onEdit, onDelete }: EntityT
             </TableCell>
             <TableCell>
               <StatusBadge type="entityRole" value={entity.role} />
+            </TableCell>
+            <TableCell className="text-sm text-muted-foreground">
+              {parent ? (
+                <Link href={`/${workspaceId}/entities/${parent.id}`} className="hover:underline">
+                  {parent.name}
+                </Link>
+              ) : "—"}
             </TableCell>
             <TableCell className="text-muted-foreground text-sm">
               {format(new Date(entity.createdAt), "MMM d, yyyy")}
@@ -76,7 +88,8 @@ export function EntityTable({ entities, workspaceId, onEdit, onDelete }: EntityT
               </div>
             </TableCell>
           </TableRow>
-        ))}
+          )
+        })}
       </TableBody>
     </Table>
   )

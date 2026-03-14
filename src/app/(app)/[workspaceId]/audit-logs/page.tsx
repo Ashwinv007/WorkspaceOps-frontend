@@ -3,6 +3,7 @@
 import { use, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { fetchAuditLogs } from "@/lib/api/audit-logs"
+import { fetchMembers } from "@/lib/api/workspaces"
 import { AuditLogFilters, AuditLogFilterValues } from "@/components/features/audit-logs/AuditLogFilters"
 import { AuditLogTable } from "@/components/features/audit-logs/AuditLogTable"
 import { Button } from "@/components/ui/button"
@@ -23,6 +24,11 @@ export default function AuditLogsPage({ params }: { params: Promise<{ workspaceI
     queryFn: () => fetchAuditLogs(workspaceId, queryFilters),
   })
 
+  const { data: membersData } = useQuery({
+    queryKey: ["members", workspaceId],
+    queryFn: () => fetchMembers(workspaceId),
+  })
+
   function handleApplyFilters(newFilters: AuditLogFilterValues) {
     setFilters(newFilters)
     setOffset(0)
@@ -41,7 +47,7 @@ export default function AuditLogsPage({ params }: { params: Promise<{ workspaceI
         <p className="text-muted-foreground mt-1">Track all actions in this workspace</p>
       </div>
 
-      <AuditLogFilters onApply={handleApplyFilters} />
+      <AuditLogFilters members={membersData?.members ?? []} onApply={handleApplyFilters} />
 
       {isLoading ? (
         <div className="space-y-2">

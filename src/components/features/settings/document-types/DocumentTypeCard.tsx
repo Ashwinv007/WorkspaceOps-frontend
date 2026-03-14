@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { deleteDocumentType } from "@/lib/api/document-types"
+import { AxiosError } from "axios"
 import { DocumentType } from "@/lib/types/api"
 import { AddFieldDialog } from "./AddFieldDialog"
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
@@ -36,10 +37,14 @@ export function DocumentTypeCard({ docType, workspaceId }: DocumentTypeCardProps
     mutationFn: () => deleteDocumentType(workspaceId, docType.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["document-types", workspaceId] })
+      queryClient.invalidateQueries({ queryKey: ["overview", workspaceId] })
       toast.success("Document type deleted")
       setDeleteOpen(false)
     },
-    onError: () => toast.error("Failed to delete document type"),
+    onError: (err: unknown) => {
+      const msg = (err as AxiosError<{ error?: string }>)?.response?.data?.error
+      toast.error(msg ?? "Failed to delete document type")
+    },
   })
 
   return (
@@ -51,6 +56,11 @@ export function DocumentTypeCard({ docType, workspaceId }: DocumentTypeCardProps
               <div className="flex items-center gap-3">
                 <p className="font-semibold">{docType.name}</p>
                 <div className="flex items-center gap-1.5">
+                  {docType.entityType && (
+                    <Badge variant="outline" className="text-xs border-blue-300 bg-blue-50 text-blue-800">
+                      {docType.entityType.charAt(0) + docType.entityType.slice(1).toLowerCase()}
+                    </Badge>
+                  )}
                   {docType.hasExpiry && <Badge variant="secondary" className="text-xs">Expiry</Badge>}
                   {docType.hasMetadata && (
                     <Badge variant="outline" className="text-xs">

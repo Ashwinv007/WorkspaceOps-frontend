@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { addField } from "@/lib/api/document-types"
+import { AxiosError } from "axios"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -52,11 +53,15 @@ export function AddFieldDialog({ open, onOpenChange, workspaceId, typeId }: AddF
     mutationFn: (values: FormValues) => addField(workspaceId, typeId, values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["document-types", workspaceId] })
+      queryClient.invalidateQueries({ queryKey: ["overview", workspaceId] })
       toast.success("Field added")
       reset()
       onOpenChange(false)
     },
-    onError: () => toast.error("Failed to add field"),
+    onError: (err: unknown) => {
+      const msg = (err as AxiosError<{ error?: string }>)?.response?.data?.error
+      toast.error(msg ?? "Failed to add field")
+    },
   })
 
   const fieldType = watch("fieldType")

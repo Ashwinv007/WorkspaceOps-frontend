@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { createDocumentType } from "@/lib/api/document-types"
+import { AxiosError } from "axios"
 import { Loader2, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -38,19 +39,7 @@ const fieldSchema = z.object({
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
   hasMetadata: z.boolean(),
-  hasExpiry: z.boolean(),
   fields: z.array(fieldSchema),
-}).superRefine((data, ctx) => {
-  if (data.hasExpiry) {
-    const hasExpiryField = data.fields.some((f) => f.isExpiryField && f.fieldType === "date")
-    if (!hasExpiryField) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "When hasExpiry is enabled, at least one date field must be marked as expiry field",
-        path: ["fields"],
-      })
-    }
-  }
 })
 
 type FormValues = z.infer<typeof schema>
@@ -68,7 +57,6 @@ export function CreateDocumentTypeDialog({ open, onOpenChange, workspaceId }: Cr
     defaultValues: {
       name: "",
       hasMetadata: false,
-      hasExpiry: false,
       fields: [],
     },
   })
@@ -76,20 +64,26 @@ export function CreateDocumentTypeDialog({ open, onOpenChange, workspaceId }: Cr
   const { fields, append, remove } = useFieldArray({ control, name: "fields" })
 
   const hasMetadata = watch("hasMetadata")
-  const hasExpiry = watch("hasExpiry")
 
   const mutation = useMutation({
-    mutationFn: (values: FormValues) => createDocumentType(workspaceId, values),
+    mutationFn: (values: FormValues) => {
+      const hasExpiry = values.fields.some((f) => f.isExpiryField && f.fieldType === "date")
+      return createDocumentType(workspaceId, { ...values, hasExpiry })
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["document-types", workspaceId] })
+      queryClient.invalidateQueries({ queryKey: ["overview", workspaceId] })
       toast.success("Document type created")
       reset()
       onOpenChange(false)
     },
-    onError: () => toast.error("Failed to create document type"),
+    onError: (err: unknown) => {
+      const msg = (err as AxiosError<{ error?: string }>)?.response?.data?.error
+      toast.error(msg ?? "Failed to create document type")
+    },
   })
 
-  const showFields = hasMetadata || hasExpiry
+  const showFields = hasMetadata
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v) }}>
@@ -114,21 +108,7 @@ export function CreateDocumentTypeDialog({ open, onOpenChange, workspaceId }: Cr
               checked={hasMetadata}
               onCheckedChange={(v) => {
                 setValue("hasMetadata", v)
-                if (!v && !hasExpiry) setValue("fields", [])
-              }}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Has Expiry</Label>
-              <p className="text-xs text-muted-foreground">Track document expiration</p>
-            </div>
-            <Switch
-              checked={hasExpiry}
-              onCheckedChange={(v) => {
-                setValue("hasExpiry", v)
-                if (!v && !hasMetadata) setValue("fields", [])
+                if (!v) setValue("fields", [])
               }}
             />
           </div>
