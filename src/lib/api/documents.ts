@@ -17,7 +17,7 @@ export async function fetchDocuments(
 
 export async function fetchExpiringDocuments(workspaceId: string, days: number): Promise<Document[]> {
   const res = await api.get(`/workspaces/${workspaceId}/documents/expiring`, { params: { days } })
-  return res.data
+  return res.data.documents
 }
 
 export async function uploadDocument(workspaceId: string, formData: FormData): Promise<Document> {
